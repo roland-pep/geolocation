@@ -47,7 +47,7 @@ export default function Index({ country }) {
       <main className="flex flex-col items-center flex-1 px-4 sm:px-20 text-center z-10 pt-8 sm:pt-20">
         <h1 className="text-3xl sm:text-5xl font-bold">Geolocation</h1>
         <p className="mt-4 text-lg sm:text-xl text-gray-700">
-          Your preferred country is set to <strong>{country}</strong>.
+          Your selected country is <strong>{country}</strong>.
         </p>
         <a
           className="flex items-center mt-4 text-md sm:text-lg text-blue-500 hover:underline"
@@ -102,7 +102,7 @@ export default function Index({ country }) {
         </section>{" "}
         <div className="p-4">
           <label htmlFor="country-select" className="mr-2">
-            Choose your country:
+            Choose your preferred country (changes cookie):
           </label>
           <select
             id="country-select"
