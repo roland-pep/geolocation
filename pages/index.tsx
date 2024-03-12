@@ -1,13 +1,12 @@
-import Image from 'next/image'
-import map from '../public/map.svg'
-import { Layout } from '@vercel/examples-ui'
+import Image from "next/image";
+import map from "../public/map.svg";
 
 // Forward properties from `middleware.ts`
 // When support for configuring gSSP to use Edge Functions lands,
 // We could add that logic here directly.
 export const getServerSideProps = ({ query }) => ({
   props: query,
-})
+});
 
 export default function Index({
   name,
@@ -18,8 +17,8 @@ export default function Index({
   currencyCode,
   currencySymbol,
 }) {
-  name = decodeURIComponent(name)
-  city = decodeURIComponent(city)
+  name = decodeURIComponent(name);
+  city = decodeURIComponent(city);
   return (
     <div className="flex flex-col items-center justify-center min-h-screen py-2 bg-gray-50">
       <div className="fixed inset-0 overflow-hidden opacity-75 bg-[#f8fafb]">
@@ -85,15 +84,15 @@ export default function Index({
             <h4 className="font-semibold text-left">Geolocation Headers</h4>
             <pre className="bg-black text-white font-mono text-left py-2 px-4 rounded-lg mt-4 text-sm leading-6">
               <p>
-                <strong>{'x-vercel-ip-city: '}</strong>
+                <strong>{"x-vercel-ip-city: "}</strong>
                 {city}
               </p>
               <p>
-                <strong>{'x-vercel-ip-country-region: '}</strong>
+                <strong>{"x-vercel-ip-country-region: "}</strong>
                 {region}
               </p>
               <p>
-                <strong>{'x-vercel-ip-country: '}</strong>
+                <strong>{"x-vercel-ip-country: "}</strong>
                 {country}
               </p>
             </pre>
@@ -101,7 +100,5 @@ export default function Index({
         </section>
       </main>
     </div>
-  )
+  );
 }
-
-Index.Layout = Layout
