@@ -110,6 +110,7 @@ export default function Index({ country }) {
             onChange={handleCountryChange}
             className="border-gray-300 border rounded p-2"
           >
+            <option value="CA">Canada</option>
             <option value="US">United States</option>
             <option value="GB">United Kingdom</option>
           </select>
