@@ -1,36 +1,42 @@
 import Image from "next/image";
-import map from "../public/map.svg";
+import map from "../../public/map.svg";
 import { useState } from "react";
+import { useRouter } from "next/router";
 
 export const getServerSideProps = ({ query }) => ({
   props: query,
 });
 
-export default function Index({
-  languages,
-
-  country,
-  currencyCode,
-}) {
+export default function Index({ country }) {
+  const router = useRouter();
   const [selectedCountry, setSelectedCountry] = useState(country);
-
-  const updateCountryPreference = async (newCountry: string) => {
-    await fetch("/api/updatePreferences", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ country: newCountry }),
-    });
-    window.location.reload(); // Optionally, consider updating the UI without reloading
-  };
 
   const handleCountryChange = async (
     event: React.ChangeEvent<HTMLSelectElement>
   ) => {
     const newCountry = event.target.value;
-    setSelectedCountry(newCountry); // Update state to ensure UI consistency
-    await updateCountryPreference(newCountry); // Submit new preference immediately
+    setSelectedCountry(newCountry);
+
+    try {
+      const response = await fetch("/api/updatePreferences", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ country: newCountry }),
+      });
+
+      if (response.ok) {
+        router.push(`/${newCountry.toLowerCase()}`);
+      } else {
+        console.error("Failed to update country preference.");
+      }
+    } catch (error) {
+      console.error(
+        "An error occurred while updating the country preference:",
+        error
+      );
+    }
   };
 
   return (

@@ -1,46 +1,33 @@
 import { NextRequest, NextResponse } from "next/server";
 
 export const config = {
-  matcher: "/",
+  matcher: ["/", "/:country(us|uk)"], // Match the root and the specific country paths
 };
 
 export function middleware(req: NextRequest) {
   const { geo, cookies, nextUrl: url } = req;
 
-  const country = cookies.get("country")?.value || geo.country || "US";
-
-  setUrlSearchParams(url, { country });
-
-  const response = NextResponse.rewrite(url);
-  // Set the country in the cookies if it's not already set or is different
-  if (cookies.get("country")?.value !== country) {
-    response.cookies.set("country", country, {
-      path: "/",
-      httpOnly: true,
-      sameSite: "lax",
-    });
+  // Direct access to a specific country page bypasses geolocation and cookie checks
+  const directAccessToCountry = url.pathname.match(/^\/(us|uk)$/);
+  if (directAccessToCountry) {
+    return NextResponse.next(); // Proceed without redirection
   }
 
-  return response;
-}
+  // Determine the country from cookie or geolocation
+  const countryPreference =
+    cookies.get("country")?.value || geo.country || "US";
+  const normalizedCountryCode =
+    countryPreference.toUpperCase() === "GB"
+      ? "UK"
+      : countryPreference.toUpperCase();
 
-function getPreference<T>(
-  cookies: NextRequest["cookies"],
-  key: string,
-  defaultValue: () => T
-): T {
-  const value = cookies.get(key)?.value;
-  return value ? (value as unknown as T) : defaultValue();
-}
+  // If the user is accessing the root without a direct country path, redirect based on preference
+  if (url.pathname === "/") {
+    const destinationUrl = url.clone(); // Clone the URL to modify it
+    destinationUrl.pathname = `/${normalizedCountryCode.toLowerCase()}`; // Change to the preferred country path
+    return NextResponse.redirect(destinationUrl);
+  }
 
-// This function sets the URL search params (props) based on the provided object
-function setUrlSearchParams(url: URL, params: Record<string, any>) {
-  Object.entries(params).forEach(([key, value]) => {
-    url.searchParams.set(
-      key,
-      typeof value === "object" && value !== null
-        ? JSON.stringify(value)
-        : value
-    );
-  });
+  // If accessing other paths, do nothing and let the request proceed
+  return NextResponse.next();
 }
