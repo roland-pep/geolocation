@@ -7,7 +7,7 @@ export const config = {
 export function middleware(req: NextRequest) {
   const { geo, cookies, nextUrl: url } = req;
 
-  // Direct access to a specific country page bypasses geolocation and cookie checks
+  // Direct access to a specific country page (US or UK) bypasses geolocation and cookie checks
   const directAccessToCountry = url.pathname.match(/^\/(us|uk)$/);
   if (directAccessToCountry) {
     return NextResponse.next(); // Proceed without redirection
