@@ -7,7 +7,7 @@ type Preferences = {
 export default function handler(req: NextApiRequest, res: NextApiResponse) {
   const { country }: Preferences = req.body;
 
-  // Example of setting headers, adjust for real use
+  // Set the country cookie
   res.setHeader("Set-Cookie", [
     `country=${country}; Path=/; HttpOnly; SameSite=Lax`,
   ]);

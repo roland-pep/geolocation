@@ -83,16 +83,7 @@ export default function Index({
             </div>
             <p className="self-center text-gray-700">{country}</p>
           </div>
-          <div className="p-4 flex justify-center items-between border-b bg-gray-50">
-            <h4 className="font-semibold text-left mr-auto">Languages</h4>
-            <div className="self-center">
-              <p className="text-gray-700">{languages}</p>
-            </div>
-          </div>
-          <div className="p-4 flex justify-center items-between border-b bg-gray-50">
-            <h4 className="font-semibold text-left mr-auto">Currency</h4>
-            <p className="text-gray-700">{`${currencyCode} `}</p>
-          </div>
+
           <div className="p-4 flexborder-b bg-gray-50 rounded-b-lg">
             <h4 className="font-semibold text-left">Geolocation Headers</h4>
             <pre className="bg-black text-white font-mono text-left py-2 px-4 rounded-lg mt-4 text-sm leading-6">

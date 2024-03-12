@@ -1,6 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import countries from "./lib/countries.json";
-import type { Country, Currency } from "./types/country";
 
 export const config = {
   matcher: "/",
@@ -9,20 +7,9 @@ export const config = {
 export function middleware(req: NextRequest) {
   const { geo, cookies, nextUrl: url } = req;
 
-  // Correctly accessing the cookie value
   const country = cookies.get("country")?.value || geo.country || "US";
 
-  const countryInfo = getCountryInfo(country);
-  const currencyCode = getPreference(cookies, "currencyCode", () =>
-    getDefaultCurrencyCode(countryInfo)
-  );
-  const currency = countryInfo.currencies[currencyCode] as Currency;
-
-  const languages = getPreference(cookies, "languages", () =>
-    getDefaultLanguages(countryInfo)
-  );
-
-  setUrlSearchParams(url, { country, currencyCode, currency, languages });
+  setUrlSearchParams(url, { country });
 
   const response = NextResponse.rewrite(url);
   // Set the country in the cookies if it's not already set or is different
@@ -37,22 +24,6 @@ export function middleware(req: NextRequest) {
   return response;
 }
 
-function getCountryInfo(countryCode: string): Country {
-  const countryInfo = countries.find(
-    (country: Country) => country.cca2 === countryCode
-  );
-  if (!countryInfo) throw new Error("Country information not found");
-  return countryInfo;
-}
-
-function getDefaultCurrencyCode(countryInfo: Country): string {
-  return Object.keys(countryInfo.currencies)[0];
-}
-
-function getDefaultLanguages(countryInfo: Country): string {
-  return Object.values(countryInfo.languages).join(", ");
-}
-
 function getPreference<T>(
   cookies: NextRequest["cookies"],
   key: string,
@@ -62,6 +33,7 @@ function getPreference<T>(
   return value ? (value as unknown as T) : defaultValue();
 }
 
+// This function sets the URL search params (props) based on the provided object
 function setUrlSearchParams(url: URL, params: Record<string, any>) {
   Object.entries(params).forEach(([key, value]) => {
     url.searchParams.set(
