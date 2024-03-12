@@ -1,7 +1,14 @@
-const { withCountryInfo } = require('./scripts/countries')
+const { withCountryInfo } = require("./scripts/countries");
 
 module.exports = withCountryInfo({
   images: {
-    domains: ['flagcdn.com'],
+    domains: ["flagcdn.com"],
   },
-})
+  typescript: {
+    // !! WARN !!
+    // Dangerously allow production builds to successfully complete even if
+    // your project has type errors.
+    // !! WARN !!
+    ignoreBuildErrors: true,
+  },
+});

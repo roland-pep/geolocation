@@ -1,24 +1,38 @@
 import Image from "next/image";
 import map from "../public/map.svg";
+import { useState } from "react";
 
-// Forward properties from `middleware.ts`
-// When support for configuring gSSP to use Edge Functions lands,
-// We could add that logic here directly.
 export const getServerSideProps = ({ query }) => ({
   props: query,
 });
 
 export default function Index({
-  name,
   languages,
-  city,
-  region,
+
   country,
   currencyCode,
-  currencySymbol,
 }) {
-  name = decodeURIComponent(name);
-  city = decodeURIComponent(city);
+  const [selectedCountry, setSelectedCountry] = useState(country);
+
+  const updateCountryPreference = async (newCountry: string) => {
+    await fetch("/api/updatePreferences", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ country: newCountry }),
+    });
+    window.location.reload(); // Optionally, consider updating the UI without reloading
+  };
+
+  const handleCountryChange = async (
+    event: React.ChangeEvent<HTMLSelectElement>
+  ) => {
+    const newCountry = event.target.value;
+    setSelectedCountry(newCountry); // Update state to ensure UI consistency
+    await updateCountryPreference(newCountry); // Submit new preference immediately
+  };
+
   return (
     <div className="flex flex-col items-center justify-center min-h-screen py-2 bg-gray-50">
       <div className="fixed inset-0 overflow-hidden opacity-75 bg-[#f8fafb]">
@@ -27,7 +41,7 @@ export default function Index({
       <main className="flex flex-col items-center flex-1 px-4 sm:px-20 text-center z-10 pt-8 sm:pt-20">
         <h1 className="text-3xl sm:text-5xl font-bold">Geolocation</h1>
         <p className="mt-4 text-lg sm:text-xl text-gray-700">
-          Show localized content based on headers
+          Your preferred country is set to <strong>{country}</strong>.
         </p>
         <a
           className="flex items-center mt-4 text-md sm:text-lg text-blue-500 hover:underline"
@@ -65,8 +79,7 @@ export default function Index({
               />
             </div>
             <div className="ml-4 mr-auto text-left">
-              <h4 className="font-semibold">{name}</h4>
-              <h5 className="text-gray-700">{city}</h5>
+              <h4 className="font-semibold">{country}</h4>
             </div>
             <p className="self-center text-gray-700">{country}</p>
           </div>
@@ -78,26 +91,32 @@ export default function Index({
           </div>
           <div className="p-4 flex justify-center items-between border-b bg-gray-50">
             <h4 className="font-semibold text-left mr-auto">Currency</h4>
-            <p className="text-gray-700">{`${currencyCode} ${currencySymbol}`}</p>
+            <p className="text-gray-700">{`${currencyCode} `}</p>
           </div>
           <div className="p-4 flexborder-b bg-gray-50 rounded-b-lg">
             <h4 className="font-semibold text-left">Geolocation Headers</h4>
             <pre className="bg-black text-white font-mono text-left py-2 px-4 rounded-lg mt-4 text-sm leading-6">
-              <p>
-                <strong>{"x-vercel-ip-city: "}</strong>
-                {city}
-              </p>
-              <p>
-                <strong>{"x-vercel-ip-country-region: "}</strong>
-                {region}
-              </p>
               <p>
                 <strong>{"x-vercel-ip-country: "}</strong>
                 {country}
               </p>
             </pre>
           </div>
-        </section>
+        </section>{" "}
+        <div className="p-4">
+          <label htmlFor="country-select" className="mr-2">
+            Choose your country:
+          </label>
+          <select
+            id="country-select"
+            value={selectedCountry}
+            onChange={handleCountryChange}
+            className="border-gray-300 border rounded p-2"
+          >
+            <option value="US">United States</option>
+            <option value="GB">United Kingdom</option>
+          </select>
+        </div>
       </main>
     </div>
   );

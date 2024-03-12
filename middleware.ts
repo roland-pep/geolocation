@@ -1,30 +1,74 @@
-import { NextRequest, NextResponse } from 'next/server'
-import countries from './lib/countries.json'
+import { NextRequest, NextResponse } from "next/server";
+import countries from "./lib/countries.json";
+import type { Country, Currency } from "./types/country";
 
-// run only on homepage
 export const config = {
-  matcher: '/',
+  matcher: "/",
+};
+
+export function middleware(req: NextRequest) {
+  const { geo, cookies, nextUrl: url } = req;
+
+  // Correctly accessing the cookie value
+  const country = cookies.get("country")?.value || geo.country || "US";
+
+  const countryInfo = getCountryInfo(country);
+  const currencyCode = getPreference(cookies, "currencyCode", () =>
+    getDefaultCurrencyCode(countryInfo)
+  );
+  const currency = countryInfo.currencies[currencyCode] as Currency;
+
+  const languages = getPreference(cookies, "languages", () =>
+    getDefaultLanguages(countryInfo)
+  );
+
+  setUrlSearchParams(url, { country, currencyCode, currency, languages });
+
+  const response = NextResponse.rewrite(url);
+  // Set the country in the cookies if it's not already set or is different
+  if (cookies.get("country")?.value !== country) {
+    response.cookies.set("country", country, {
+      path: "/",
+      httpOnly: true,
+      sameSite: "lax",
+    });
+  }
+
+  return response;
 }
 
-export async function middleware(req: NextRequest) {
-  const { nextUrl: url, geo } = req
-  const country = geo.country || 'US'
-  const city = geo.city || 'San Francisco'
-  const region = geo.region || 'CA'
+function getCountryInfo(countryCode: string): Country {
+  const countryInfo = countries.find(
+    (country: Country) => country.cca2 === countryCode
+  );
+  if (!countryInfo) throw new Error("Country information not found");
+  return countryInfo;
+}
 
-  const countryInfo = countries.find((x) => x.cca2 === country)
+function getDefaultCurrencyCode(countryInfo: Country): string {
+  return Object.keys(countryInfo.currencies)[0];
+}
 
-  const currencyCode = Object.keys(countryInfo.currencies)[0]
-  const currency = countryInfo.currencies[currencyCode]
-  const languages = Object.values(countryInfo.languages).join(', ')
+function getDefaultLanguages(countryInfo: Country): string {
+  return Object.values(countryInfo.languages).join(", ");
+}
 
-  url.searchParams.set('country', country)
-  url.searchParams.set('city', city)
-  url.searchParams.set('region', region)
-  url.searchParams.set('currencyCode', currencyCode)
-  url.searchParams.set('currencySymbol', currency.symbol)
-  url.searchParams.set('name', currency.name)
-  url.searchParams.set('languages', languages)
+function getPreference<T>(
+  cookies: NextRequest["cookies"],
+  key: string,
+  defaultValue: () => T
+): T {
+  const value = cookies.get(key)?.value;
+  return value ? (value as unknown as T) : defaultValue();
+}
 
-  return NextResponse.rewrite(url)
+function setUrlSearchParams(url: URL, params: Record<string, any>) {
+  Object.entries(params).forEach(([key, value]) => {
+    url.searchParams.set(
+      key,
+      typeof value === "object" && value !== null
+        ? JSON.stringify(value)
+        : value
+    );
+  });
 }
