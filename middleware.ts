@@ -16,10 +16,7 @@ export function middleware(req: NextRequest) {
   // Determine the country from cookie or geolocation
   const countryPreference =
     cookies.get("country")?.value || geo.country || "US";
-  const normalizedCountryCode =
-    countryPreference.toUpperCase() === "GB"
-      ? "GB"
-      : countryPreference.toUpperCase();
+  const normalizedCountryCode = countryPreference.toUpperCase();
 
   // If the user is accessing the root without a direct country path, redirect based on preference
   if (url.pathname === "/") {
