@@ -1,6 +1,4 @@
-const { withCountryInfo } = require("./scripts/countries");
-
-module.exports = withCountryInfo({
+module.exports = {
   images: {
     domains: ["flagcdn.com"],
   },
@@ -11,4 +9,4 @@ module.exports = withCountryInfo({
     // !! WARN !!
     ignoreBuildErrors: true,
   },
-});
+};
